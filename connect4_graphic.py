@@ -10,7 +10,7 @@ import math
 
 ROW_COUNT = 6
 COLUMN_COUNT = 7
-
+pygame.init()
 
 def create_board():
     """Create the matrix for the game"""
@@ -73,6 +73,7 @@ square_size = 50
 width = COLUMN_COUNT * square_size
 height = (ROW_COUNT + 1) * square_size
 screen_size = (width, height)
+font = pygame.font.SysFont('monospace', 30)
 
 # set color (R, G, B)
 BLUE = (0, 0, 200)
@@ -103,7 +104,7 @@ game_over = False
 turn = 0
 
 # set Screen
-pygame.init()
+
 screen = pygame.display.set_mode(screen_size)
 draw_board(board)
 pygame.display.update()
@@ -111,13 +112,26 @@ pygame.display.update()
 while not game_over:
 
     for event in pygame.event.get():
+
         # to close the game
         if event.type == pygame.QUIT:
             sys.exit()
+        # track the mouse movement in the screen
+        if event.type == pygame.MOUSEMOTION:
+            # Will delete the previous circle so the new circle can be seen
+            pygame.draw.rect(screen, BLACK, (0, 0, width, square_size))
+            position_x = event.pos[0]
+            if turn == 0:
+                pygame.draw.circle(screen, RED, (position_x, square_size // 2), RADIUS)
+            else:
+                pygame.draw.circle(screen, YELLOW, (position_x, square_size // 2), RADIUS)
+        pygame.display.update()
+
         # If click on the mouse button
         if event.type == pygame.MOUSEBUTTONDOWN:
             print('Mouse button clicked')
             print(event.pos)
+            pygame.draw.rect(screen, BLACK, (0, 0, width, square_size))
             # Ask for player 1 input
             if turn is 0:
                 # get x position of the mouse location
@@ -128,6 +142,8 @@ while not game_over:
                     drop_piece(board, row, col, 1)
                     if wining_board(board, 1):
                         print('Player 1 wins!!!')
+                        label = font.render('Player 1 wins!!', True, RED)
+                        screen.blit(label, (40, 10))
                         game_over = True
                 else:
                     print('column is full')
@@ -143,6 +159,8 @@ while not game_over:
 
                     if wining_board(board, 2):
                         print('Player 2 wins!!!')
+                        label = font.render('Player 2 wins!!', True, YELLOW)
+                        screen.blit(label, (40, 10))
                         game_over = True
                 else:
                     print('column is full')
@@ -151,3 +169,6 @@ while not game_over:
             draw_board(board)
             turn += 1
             turn = turn % 2
+
+            if game_over:
+                pygame.time.wait(3000)
